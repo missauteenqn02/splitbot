@@ -36,7 +36,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const coinId = getCoinIdBySymbol('UCT');
     if (coinId) {
       log("Minting 10000 UCT for the bot...");
-      const result: any = await sphere.payments.mintFungibleToken(coinId, 10000n);
+      const result: any = await sphere.payments.mintFungibleToken(coinId, BigInt(10000));
       if (result.success || result.status === 'completed' || result.deliveryPending) {
         log("Mint success!");
       } else {

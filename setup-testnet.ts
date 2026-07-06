@@ -35,7 +35,7 @@ async function setup() {
   const coinId = getCoinIdBySymbol('UCT');
   if (coinId) {
     console.log("Minting 1000000 UCT for the bot...");
-    const result = await sphere.payments.mintFungibleToken(coinId, 1000000n);
+    const result = await sphere.payments.mintFungibleToken(coinId, BigInt(1000000));
     if ((result as any).success || (result as any).status === 'completed' || (result as any).deliveryPending) {
       console.log("Mint success!");
     } else {
