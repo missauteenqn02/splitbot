@@ -12,9 +12,12 @@ export async function getSphere(): Promise<Sphere> {
     // Just fail early or mock.
   }
 
+  const isProd = process.env.NODE_ENV === 'production';
   const base = createNodeProviders({
     network: 'testnet',
     oracle: { apiKey: 'sk_ddc3cfcc001e4a28ac3fad7407f99590' }, // public testnet2 key
+    dataDir: isProd ? '/tmp/sphere-data' : undefined,
+    tokensDir: isProd ? '/tmp/sphere-tokens' : undefined,
   });
 
   const providers = createWalletApiProviders(base, {
