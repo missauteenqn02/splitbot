@@ -10,7 +10,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const sphere = await getSphere();
 
     // Sleep briefly to let the SDK sync DMs from Nostr relays
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 5000));
 
     const conversations = sphere.communications?.getConversations();
     if (!conversations) {
@@ -19,10 +19,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     let newExpensesCount = 0;
     let maxTimestamp = store.lastProcessedTimestamp;
+    
+    const debugMessages = [];
 
     // Process all DMs across all conversations
     for (const [peerPubkey, messages] of conversations.entries()) {
       for (const msg of messages) {
+        debugMessages.push({ peer: peerPubkey, content: msg.content, sender: msg.senderPubkey, bot: sphere.identity?.chainPubkey });
         if (msg.timestamp <= store.lastProcessedTimestamp) continue;
         
         // Skip messages sent by the bot itself
@@ -60,7 +63,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.status(200).json({ 
       success: true, 
       newExpensesCount, 
-      updatedBalances: store.balance 
+      updatedBalances: store.balance,
+      debugMessages
     });
   } catch (error: any) {
     console.error(error);
