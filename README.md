@@ -1,40 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# SplitBot - Autonomous Group Expense Settlement Agent
 
-## Getting Started
+SplitBot is an autonomous economic agent built on the Unicity Testnet v2 using the Sphere SDK. It acts as an automated ledger and settlement coordinator for group expenses.
 
-First, run the development server:
+### Hackathon / Builder Program Details
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Track:** Social and Messaging
+- **Agentic: Yes** 
+  - *Justification:* SplitBot operates entirely autonomously on a cron cycle (via Next.js API routes). It periodically polls for Nostr DM commands, parses natural-language-like expense reports using Regex, updates a unified ledger via a greedy min-cash-flow netting algorithm, and autonomously sends real `payment_request` primitives on the Unicity Testnet to settle debts. Once deployed, it requires zero human intervention or approval to manage group settlements and reminders.
+- **AstridOS: No**
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### How it Works
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+1. **Ingest:** Users DM the bot's nametag (`@splitbot_39074` for this deployment) with commands like `/split 300 UCT @alice,@bob memo:"dinner"`.
+2. **Compute:** The `/api/ingest` cron parses these messages, and `lib/ledger.ts` computes the optimal "who owes whom" settlement paths.
+3. **Settle:** The `/api/settle` cron runs periodically to issue real Unicity `payment_requests` to the debtors, asking them to pay the owed amount.
+4. **Dashboard:** A dynamic, premium dashboard displays the ledger, pending settlements, and latest expenses.
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+### Run Instructions (Testnet v2)
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+This bot is configured to run on the Unicity Testnet v2.
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. **Prerequisites:**
+   - Node.js (v20+)
+   - A Unicity Sphere Wallet configured for Testnet v2.
 
-## Learn More
+2. **Setup:**
+   ```bash
+   npm install
+   # .env.local must be populated with your SPHERE_NAMETAG and SPHERE_MNEMONIC
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+3. **Running Locally:**
+   ```bash
+   npm run dev
+   ```
+   Open `http://localhost:3000` to view the Dashboard. You can use the "Run Ingest" and "Run Settle" buttons to manually trigger the crons for testing.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
+4. **Testing as a User:**
+   - From your own Sphere Extension (or CLI), send a Direct Message to `@splitbot_39074` (or your bot's nametag).
+   - Format: `/split 500 UCT @your_nametag,@friend_nametag memo:"test expense"`
+   - Click "Run Ingest" on the bot's dashboard.
+   - Click "Run Settle" on the bot's dashboard.
+   - You should receive a real Unicity Testnet Payment Request from the bot for the netted amount!
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Project Structure
+- `lib/sphere.ts`: Sphere SDK wrapper and wallet initialization
+- `lib/ledger.ts`: Core netting algorithm (Greedy min-cash-flow)
+- `lib/parser.ts`: Natural language parser for expense DMs
+- `pages/api/ingest.ts`: Cron handler for reading DMs and updating the ledger
+- `pages/api/settle.ts`: Cron handler for dispatching payment requests
+- `pages/index.tsx`: Web Dashboard
 
-## Deploy on Vercel
+### Production Deployment (Vercel)
+This app is ready to deploy on Vercel. 
+Simply link your GitHub repo and configure the `SPHERE_MNEMONIC` environment variable. The `vercel.json` file configures the serverless crons automatically.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
