@@ -51,24 +51,49 @@ export default function Home() {
 
   if (!data) return <div className="p-8 text-center text-gray-500">Loading Dashboard...</div>;
 
+  const handleSimulate = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/simulate-dm');
+      const data = await res.json();
+      if (data.success) {
+        alert(data.message + "\n\nNow wait 5 seconds and click Run Ingest!");
+      } else {
+        alert("Simulation failed: " + data.error);
+      }
+    } catch (e: any) {
+      alert("Error: " + e.message);
+    }
+    setLoading(false);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 p-8 font-sans">
-      <div className="max-w-4xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gray-50 p-8 font-sans text-gray-900">
+      <div className="max-w-4xl mx-auto">
         <header className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">SplitBot Dashboard</h1>
+            <h1 className="text-3xl font-bold text-gray-800">SplitBot Dashboard</h1>
             <p className="text-gray-500">Autonomous Group Expense Settlement Agent</p>
           </div>
           <div className="space-x-4">
             <button 
-              onClick={runIngest}
-              className="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700"
+              onClick={handleSimulate} 
+              disabled={loading}
+              className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded shadow-sm transition-colors"
+            >
+              Simulate DM
+            </button>
+            <button 
+              onClick={runIngest} 
+              disabled={loading}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded shadow-sm transition-colors"
             >
               Run Ingest
             </button>
             <button 
               onClick={runSettle}
-              className="px-4 py-2 bg-green-600 text-white rounded shadow hover:bg-green-700"
+              disabled={loading}
+              className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded shadow-sm transition-colors"
             >
               Run Settle
             </button>
