@@ -7,8 +7,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const targetNametag = process.env.SPHERE_NAMETAG || '@splitbot_39074';
     
     // Create a temporary sphere instance for a "fake user"
+    const isProd = process.env.NODE_ENV === 'production';
     const providers = createNodeProviders({
       network: 'testnet',
+      dataDir: isProd ? '/tmp/sphere-data-sim' : undefined,
+      tokensDir: isProd ? '/tmp/sphere-tokens-sim' : undefined,
     });
     
     // Using autoGenerate: true creates a throwaway identity
